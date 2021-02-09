@@ -1,0 +1,26 @@
+@{ Layout = "_AdminLayout"; }
+
+<div class="row">
+    <div class="col-md-12" style="font-size: 12px;">
+        <textarea  id="text" type="text" class="col-md-12"  ></textarea>
+        <input type="button" onclick="syncSharepointUsers()" value="Sync SharePoint Users" />
+    </div>
+</div>
+<script language="javascript">
+
+
+    function syncSharepointUsers() {
+        $.ajax({
+            type: "POST",
+            url: "/api/clockify/update-sharepoint-users",
+            contentType: "application/form-url-encoded; charset=utf-8",
+            data: {
+                sharePointPeople: $("#text").val()
+            },
+            success: function (result) {
+                alert(result.message);
+            }
+        });
+    }
+
+</script>

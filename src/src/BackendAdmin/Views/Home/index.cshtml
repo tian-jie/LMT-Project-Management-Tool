@@ -1,0 +1,100 @@
+@{ Layout = "_AdminLayout"; }
+
+<div class="row">
+    <div class="col-md-12">
+
+        <div class="col-md-6 col-sm-12">
+
+            <input type="button" onclick="syncProject()" value="Sync Project" />
+            <input type="button" onclick="syncUser()" value="Sync User" />
+            <input type="button" onclick="syncGroup()" value="Sync Group" />
+            <input type="button" onclick="syncClient()" value="Sync Client" />
+        </div>
+        <div class="col-md-6 col-sm-12">
+            <div class="col-md-6 col-sm-6">
+                <input type="button" onclick="syncTimeEntryV2()" value="Sync Time Entries (V2, by each record)" />
+            </div>
+            <div id="reportrange" class="col-md-6 col-sm-6 pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc">
+                <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+                <span id="date-range">2020-01-01 - 2020-12-31</span> <b class="caret"></b>
+            </div>
+        </div>
+
+        @*<input type="button" onclick="syncTimeEntryV3()" value="Sync Time Entries (V3, by date, summarized by Task)" />*@
+    </div>
+</div>
+<script language="javascript">
+    function syncProject() {
+        $.ajax({
+            type: "POST",
+            url: "/api/clockify/sync-projects",
+            success: function (result) {
+                alert(result.message);
+            }
+        });
+    }
+
+    function syncUser() {
+        $.ajax({
+            type: "POST",
+            url: "/api/clockify/sync-users",
+            success: function (result) {
+                alert(result.message);
+            }
+        });
+    }
+
+    function syncGroup() {
+        $.ajax({
+            type: "POST",
+            url: "/api/clockify/sync-groups",
+            success: function (result) {
+                alert(result.message);
+            }
+        });
+    }
+
+    function syncClient() {
+        $.ajax({
+            type: "POST",
+            url: "/api/clockify/sync-clients",
+            success: function (result) {
+                alert(result.message);
+            }
+        });
+    }
+
+    function syncTimeEntryV2() {
+        var startDate = $('#reportrange span').text().substring(0, 10);
+        var endDate = $('#reportrange span').text().substring(13, 23);
+        $.ajax({
+            type: "GET",
+            url: "/api/v1/clockify-api/sync-time-entry-v2",
+            data: {
+                startTime: startDate,
+                endTime: endDate
+            },
+            success: function (result) {
+                alert(result.message);
+            }
+        });
+    }
+
+    function syncTimeEntryV3() {
+        var startDate = $('#reportrange span').text().substring(0, 10);
+        var endDate = $('#reportrange span').text().substring(13, 23);
+        $.ajax({
+            type: "GET",
+            url: "/api/v1/clockify-api/sync-time-entry-v3",
+            data: {
+                startTime: startDate,
+                endTime: endDate
+            },
+            success: function (result) {
+                alert(result.message);
+            }
+        });
+    }
+
+
+</script>
