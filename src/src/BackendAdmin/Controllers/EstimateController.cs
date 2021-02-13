@@ -2,10 +2,10 @@
 
 namespace Microsoft.eShopWeb.BackendAdmin.Controllers
 {
-    public class ProjectController : Controller
+    public class EstimateController : Controller
     {
 
-        public ProjectController()
+        public EstimateController()
         {
         }
 

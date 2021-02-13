@@ -10,8 +10,8 @@ namespace Microsoft.eShopWeb.BackendAdmin.Services
 {
     public class EmployeeService : BaseService<Employee>, IEmployeeService
     {
-        public EmployeeService(CatalogContext timesheetContext)
-            : base(timesheetContext)
+        public EmployeeService(CatalogContext dbContext)
+            : base(dbContext)
         {
 
         }
@@ -31,10 +31,10 @@ namespace Microsoft.eShopWeb.BackendAdmin.Services
 
             return await Task.Run(() =>
             {
-
-                var employees = from e in _dbContext.Employee
-                                join er in _dbContext.EmployeeTitle on e.Gid equals er.EmployeeGid
-                                join rt in _dbContext.RoleTitle on er.RoleId equals rt.Id
+                var dbContext = (CatalogContext)_dbContext;
+                var employees = from e in dbContext.Employee
+                                join er in dbContext.EmployeeTitle on e.Gid equals er.EmployeeGid
+                                join rt in dbContext.RoleTitle on er.RoleId equals rt.Id
                                 where e.IsDeleted.Value != true && er.IsDeleted.Value != true && rt.IsDeleted.Value != true
                                 select new EmployeeViewModel
                                 {

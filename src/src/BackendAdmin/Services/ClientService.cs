@@ -7,8 +7,8 @@ namespace Microsoft.eShopWeb.BackendAdmin.Services
 {
     public class ClientService : BaseService<Client>, IClientService
     {
-        public ClientService(CatalogContext timesheetContext)
-            : base(timesheetContext)
+        public ClientService(CatalogContext dbContext)
+            : base(dbContext)
         {
         }
 

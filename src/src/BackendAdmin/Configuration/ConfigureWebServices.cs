@@ -21,6 +21,7 @@ namespace Microsoft.eShopWeb.Web.Configuration
 
             services.AddScoped<ITimesheetService, TimesheetService>();
             services.AddScoped<IClockifyService, ClockifyService>();
+            services.AddScoped<IEstimateEffortService, EstimateEffortService>();
 
 
             return services;
