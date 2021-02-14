@@ -7,7 +7,7 @@ namespace Microsoft.eShopWeb.BackendAdmin.ViewModels
         /// <summary>
         /// 主键ID
         /// </summary>
-        public int Id { get; protected set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// Clockify里的id字符串

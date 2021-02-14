@@ -9,7 +9,7 @@ namespace Microsoft.eShopWeb.ApplicationCore.Entities
         /// <summary>
         /// 主键ID
         /// </summary>
-        public override int Id { get; protected set; }
+        public override int Id { get; set; }
 
         /// <summary>
         /// Clockify里的id字符串

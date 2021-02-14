@@ -60,6 +60,18 @@ namespace Microsoft.eShopWeb.BackendAdmin.Controllers
 
         }
 
+
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _estimateEffortService.DeleteAsync(a => a.Id == id);
+
+            return new JsonResult(new
+            {
+                code = 200,
+                Message = $"success, deleted."
+            });
+        }
+
     }
 
 

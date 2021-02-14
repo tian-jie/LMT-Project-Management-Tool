@@ -8,7 +8,7 @@
                 <div class="col-md-3 col-sm-4  tile_stats_count">
                     <span class="count_top"><i class="fa fa-usd" aria-hidden="true"></i> Total Hours</span>
                     <div id="total-hours" class="count">-</div>
-                    <span class="count_bottom"><i class="fa fa-clock-o"></i> Assigned to Project</span>
+                    <span class="count_bottom"><i class="fa fa-clock-o"></i> Estimate by Hours</span>
                 </div>
                 <div class="col-md-3 col-sm-4  tile_stats_count">
                     <span class="count_top"><i class="fa fa-clock-o"></i> Total Effort</span>
@@ -27,7 +27,7 @@
         <div class="row">
 
             <div id="toolbar">
-                <button class="btn btn-success">添加</button>
+                <button class="btn btn-success" data-toggle="modal" data-target=".bs-example-modal-lg" onclick="edit(0)">添加</button>
                 <button class="btn btn-warning" onclick="refreshData()">刷新</button>
             </div>
             <div class="col-md-12 col-sm-12 table-responsive">
@@ -52,6 +52,7 @@
                         </button>
                     </div>
                     <div class="modal-body">
+                        <input type="hidden" id="data-id" required="required" class="form-control ">
                         <div class="col-md-12">
                             <div class="col-md-2">
                                 Role:
@@ -61,7 +62,7 @@
                                 </select>
                             </div>
                             <div class="col-md-2">
-                                Role: <span id="data-role-rate">100</span>
+                                Rate: <span id="data-role-rate">100</span>
                             </div>
                         </div>
                         <div class="col-md-12">
@@ -69,7 +70,7 @@
                                 Effort:
                             </div>
                             <div class="col-md-8">
-                                <input type="text" id="data-effort" required="required" class="form-control ">
+                                <input type="number" id="data-effort" required="required" class="form-control ">
                             </div>
                         </div>
                         <div class="col-md-12">
@@ -77,7 +78,7 @@
                                 Effort Rate:
                             </div>
                             <div class="col-md-8">
-                                <input type="text" id="data-effort-rate" required="required" class="form-control ">
+                                <input type="number" readonly="readonly" id="data-effort-rate" required="required" class="form-control ">
                             </div>
                         </div>
                     </div>
@@ -105,14 +106,24 @@
             initBoostraptable();
             getExternalRoles();
 
-
+            // 监视下拉框修改，实时变化
             $('#data-role').change(function () {
                 // 修改对应的role-rate
                 var roleId = $('#data-role')[0].value;
                 var roleRate = roles.filter(item => item.id == roleId)[0].rate;
                 $('#data-role-rate')[0].innerText = roleRate;
                 // 修改对应的budget(带role的effort)
+                var effort = $('#data-effort').val();
+                $('#data-effort-rate').val(roleRate * effort);
+            });
 
+            // 监视effort修改，实时变化
+            $('#data-effort').bind('input porpertychange', function () {
+                var effort = parseInt($('#data-effort').val(), 10);
+                if (!isNaN(effort)) {
+                    var rate = parseInt($('#data-role-rate')[0].innerText, 10);
+                    $('#data-effort-rate').val(effort * rate);
+                }
             });
         });
 
@@ -137,15 +148,18 @@
         function submitData() {
 
             $('#submit')[0].disabled = true;
+            var role = roles.filter(item => item.id == $('#data-role').val())[0];
             var estimate = {
-                id: 0,
                 projectGid: 'PLC219.1',
                 projectId: 0,
                 taskGid: '',
-                roleId: 65,
-                roleTitle: 'Sr. Programmer',
-                roleRate: 130,
-                effort: 201
+                roleId: $('#data-role').val(),
+                roleTitle: role.title,
+                roleRate: role.rate,
+                effort: $('#data-effort').val(),
+                //id: parseInt($('#data-id').val()),
+                id: parseInt($('#data-id').val()),
+                employeeGid: 'tttest',
             };
 
             $.ajax({
@@ -155,13 +169,16 @@
                 contentType: 'application/json',
                 success: function (result) {
                     console.log('/api/v1/estimate-effort-api/save - success');
-                    //$('#modal').style = 'display: none';
-
                     // 完成后再refresh一次啊
                     $('.bs-example-modal-lg').modal("hide");
                     $('#submit')[0].disabled = false;
 
                     refreshData();
+                },
+                error: function (r) {
+                    $('#submit')[0].disabled = false;
+                    Ewin.alert({ message: '操作失败，请重试，或者联系系统管理员。' });
+
                 }
             });
 
@@ -202,7 +219,7 @@
 
         //}
 
-        function initBoostraptable(rows) {
+        function initBoostraptable() {
             $('#data-table').bootstrapTable({
                 toolbar: $('#toolbar'),
                 showFooter: true,
@@ -258,7 +275,6 @@
                 method: 'get',  //使用get请求到服务器获取数据
                 url: '/api/v1/estimate-effort-api/get-list-by-project', //获取数据的Servlet地址
                 striped: true,  //表格显示条纹
-                showRefresh: true,
                 queryParams: function queryParams(params) {   //设置查询参数
                     var param = {
                         pageNumber: params.pageNumber,
@@ -285,15 +301,45 @@
         }
 
         function edit(id) {
+            $('#data-id').val(id);
+            if (id == 0) {
+                $('#data-effort').val(0);
+                $('#data-effort-rate').val(0);
+                return;
+            }
             var row = dataList.filter(item => item.id == id)[0];
 
-            console.log('edit invoked');
+            // 把元素扔上去
+            $('#data-role').val(row.roleId);
+            $('#data-effort').val(row.effort);
+            $('#data-effort-rate').val(row.effort * row.roleRate);
+            $('#data-role-rate')[0].innerText = row.roleRate;
 
         }
-        function del(id) {
-            var row = dataList.filter(item => item.id == id)[0];
 
+        function del(id) {
             console.log('del invoked');
+
+            Ewin.confirm({ message: "确认要删除选择的数据吗？" }).on(function (e) {
+                if (!e) {
+                    return;
+                }
+                var d = { id: id };
+                $.ajax({
+                    type: 'get',
+                    url: '/api/v1/estimate-effort-api/delete',
+                    data: {
+                        id: id
+                    },
+                    contentType: 'application/json',
+                    success: function (result) {
+                        console.log('/api/v1/estimate-effort-api/delete - success');
+
+                        // 完成后再refresh一次啊
+                        refreshData();
+                    }
+                });
+            });
 
         }
 
