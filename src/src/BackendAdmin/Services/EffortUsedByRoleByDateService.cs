@@ -46,7 +46,7 @@ namespace Microsoft.eShopWeb.BackendAdmin.Services
         public async Task<List<EffortUsedViewModel>> GetEffortUsedByRole(string projectGid, string taskGid)
         {
             var effortsQuery = await WhereAsync(a => a.ProjectGid == projectGid);
-            if (string.IsNullOrEmpty(taskGid))
+            if (!string.IsNullOrEmpty(taskGid))
             {
                 effortsQuery = effortsQuery.Where(a => a.TaskGid == taskGid);
             }
@@ -65,7 +65,7 @@ namespace Microsoft.eShopWeb.BackendAdmin.Services
         public async Task<List<EffortUsedViewModel>> GetEffortUsedByRoleCategory(string projectGid, string taskGid)
         {
             var effortsQuery = await WhereAsync(a => a.ProjectGid == projectGid);
-            if (string.IsNullOrEmpty(taskGid))
+            if (!string.IsNullOrEmpty(taskGid))
             {
                 effortsQuery = effortsQuery.Where(a => a.TaskGid == taskGid);
             }

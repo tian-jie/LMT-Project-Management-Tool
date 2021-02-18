@@ -21,5 +21,6 @@ namespace Microsoft.eShopWeb.Web.Extensions
         {
             return "types";
         }
+
     }
 }

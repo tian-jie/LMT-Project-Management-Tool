@@ -17,17 +17,20 @@ namespace Microsoft.eShopWeb.BackendAdmin.Controllers
         private readonly ITimeEntryService _timeEntryService;
         private readonly IProjectTaskService _projectTaskService;
         private readonly IProjectService _projectService;
+        private readonly IProjectOwnerService _projectOwnerService;
         private readonly IEffortUsedByRoleByDateService _effortUsedByRoleByDateService;
 
         public ProjectApiController(IProjectService projectService,
             ITimeEntryService timeEntryService,
             IProjectTaskService projectTaskService,
-            IEffortUsedByRoleByDateService effortUsedByRoleByDateService)
+            IEffortUsedByRoleByDateService effortUsedByRoleByDateService,
+            IProjectOwnerService projectOwnerService)
         {
             _projectTaskService = projectTaskService;
             _timeEntryService = timeEntryService;
             _projectService = projectService;
             _effortUsedByRoleByDateService = effortUsedByRoleByDateService;
+            _projectOwnerService = projectOwnerService;
         }
 
 
@@ -98,5 +101,47 @@ namespace Microsoft.eShopWeb.BackendAdmin.Controllers
                 data = effortUsedByRole
             });
         }
+
+        public async Task<IActionResult> List(string favorateByUserId, string filterByTeam, string filterByOwner)
+        {
+            var result = await _projectService.ListAllAsync();
+            if (string.IsNullOrEmpty(favorateByUserId))
+            {
+
+            }
+
+            if (string.IsNullOrEmpty(filterByTeam))
+            {
+
+            }
+
+            if (string.IsNullOrEmpty(filterByOwner))
+            {
+                var projectIdsByOwner = (await _projectOwnerService.WhereAsync(a => a.EmployeeGid==filterByOwner)).Select(a=>a.ProjectGid).ToList();
+                result = result.Where(a => projectIdsByOwner.Contains(a.Gid)).ToList();
+            }
+
+
+            return new JsonResult(new
+            {
+                code = 200,
+                total = result.Count,
+                rows = result
+            });
+        }
+
+        public async Task<IActionResult> ListWithStatus(string favorateByUserId, string filterByTeam, string filterByManager)
+        {
+            var result = await _projectService.ListAllAsync();
+
+            // TODO: 增加显示status，EAC等数据
+            return new JsonResult(new
+            {
+                code = 200,
+                total = result.Count,
+                rows = result
+            });
+        }
+
     }
 }

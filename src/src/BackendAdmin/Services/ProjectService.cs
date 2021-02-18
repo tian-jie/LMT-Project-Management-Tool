@@ -7,8 +7,8 @@ namespace Microsoft.eShopWeb.BackendAdmin.Services
 {
     public class ProjectService : BaseService<Project>, IProjectService
     {
-        public ProjectService(CatalogContext timesheetContext)
-            : base(timesheetContext)
+        public ProjectService(CatalogContext dbContext)
+            : base(dbContext)
         {
 
         }

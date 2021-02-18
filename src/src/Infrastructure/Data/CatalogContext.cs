@@ -39,7 +39,9 @@ namespace Microsoft.eShopWeb.Infrastructure.Data
         public DbSet<UserGroup> UserGroup { get; set; }
         public DbSet<SharePointUser> SharePointUser { get; set; }
         public DbSet<EffortUsedByRoleByDate> AcByRoleByDate { get; set; }
+        public DbSet<AspNetMenu> AspNetMenu { get; set; }
 
+        public DbSet<ProjectOwner> ProjectOwner { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

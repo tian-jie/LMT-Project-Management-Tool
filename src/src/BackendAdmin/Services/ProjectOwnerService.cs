@@ -4,9 +4,9 @@ using Microsoft.eShopWeb.Infrastructure.Data;
 
 namespace Microsoft.eShopWeb.BackendAdmin.Services
 {
-    public class ProjectTaskService : BaseService<ProjectTask>, IProjectTaskService
+    public class ProjectOwnerService : BaseService<ProjectOwner>, IProjectOwnerService
     {
-        public ProjectTaskService(CatalogContext dbContext)
+        public ProjectOwnerService(CatalogContext dbContext)
             : base(dbContext)
         {
 

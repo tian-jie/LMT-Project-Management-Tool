@@ -7,8 +7,8 @@ namespace Microsoft.eShopWeb.BackendAdmin.Services
 {
     public class UserGroupService : BaseService<UserGroup>, IUserGroupService
     {
-        public UserGroupService(CatalogContext timesheetContext)
-            : base(timesheetContext)
+        public UserGroupService(CatalogContext dbContext)
+            : base(dbContext)
         {
 
         }

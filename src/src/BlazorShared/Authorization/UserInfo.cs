@@ -10,5 +10,7 @@ namespace BlazorShared.Authorization
         public string RoleClaimType { get; set; }
         public string Token { get; set; }
         public IEnumerable<ClaimValue> Claims { get; set; }
+
+        public IEnumerable<AspNetMenu> MenuClaims { get; set; }
     }
 }

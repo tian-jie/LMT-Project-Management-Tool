@@ -23,6 +23,8 @@ namespace Microsoft.eShopWeb.Web.Configuration
             services.AddScoped<IClockifyService, ClockifyService>();
             services.AddScoped<IEstimateEffortService, EstimateEffortService>();
 
+            services.AddScoped<IAspNetMenuService, AspNetMenuService>();
+            services.AddScoped<IProjectOwnerService, ProjectOwnerService>();
 
             return services;
         }

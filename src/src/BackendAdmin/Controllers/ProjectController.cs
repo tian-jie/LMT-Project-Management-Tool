@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Microsoft.eShopWeb.BackendAdmin.Controllers
 {
+    [Authorize]
     public class ProjectController : Controller
     {
-
         public ProjectController()
         {
         }
@@ -14,6 +15,14 @@ namespace Microsoft.eShopWeb.BackendAdmin.Controllers
         {
             return View();
         }
+
+        [HttpGet]
+        public IActionResult Detail()
+        {
+            return View();
+        }
+
+
 
     }
 }

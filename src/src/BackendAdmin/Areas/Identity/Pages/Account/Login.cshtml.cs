@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.eShopWeb.Infrastructure.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
+using Microsoft.eShopWeb.BackendAdmin.Interfaces;
 
 namespace Microsoft.eShopWeb.Web.Areas.Identity.Pages.Account
 {
@@ -22,12 +23,14 @@ namespace Microsoft.eShopWeb.Web.Areas.Identity.Pages.Account
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
         private readonly IBasketService _basketService;
+        private readonly IAspNetMenuService _menuService;
 
-        public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger, IBasketService basketService)
+        public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger, IBasketService basketService, IAspNetMenuService menuService)
         {
             _signInManager = signInManager;
             _logger = logger;
             _basketService = basketService;
+            _menuService = menuService;
         }
 
         [BindProperty]
@@ -84,8 +87,8 @@ namespace Microsoft.eShopWeb.Web.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User logged in.");
                     await TransferAnonymousBasketToUserAsync(Input.Email);
+                    await _menuService.GetCachedMenus();
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
