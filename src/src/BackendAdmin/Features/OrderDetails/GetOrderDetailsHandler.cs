@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.ApplicationCore.Specifications;
+using Microsoft.eShopWeb.BusinessCore.ViewModels;
 using Microsoft.eShopWeb.Web.ViewModels;
 using System.Linq;
 using System.Threading;

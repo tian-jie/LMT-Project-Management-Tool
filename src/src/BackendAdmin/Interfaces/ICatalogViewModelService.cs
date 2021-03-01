@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.eShopWeb.Web.ViewModels;
+using Microsoft.eShopWeb.BusinessCore.ViewModels;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

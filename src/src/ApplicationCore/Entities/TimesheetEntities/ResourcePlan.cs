@@ -22,6 +22,11 @@ namespace Microsoft.eShopWeb.ApplicationCore.Entities
         public string EmployeeGid { get; set; }
 
         /// <summary>
+        /// TaskName
+        /// </summary>
+        public string TaskName { get; set; }
+
+        /// <summary>
         /// Year
         /// </summary>
         public int Year { get; set; }
@@ -35,6 +40,21 @@ namespace Microsoft.eShopWeb.ApplicationCore.Entities
         /// Amount
         /// </summary>
         public decimal Amount { get; set; }
+
+        /// <summary>
+        /// 百分比，乘100的数
+        /// </summary>
+        public int Workload { get; set; }
+
+        /// <summary>
+        /// Duration
+        /// </summary>
+        public DateTime StartDate { get; set; }
+
+        /// <summary>
+        /// Duration
+        /// </summary>
+        public DateTime EndDate { get; set; }
 
 
         /// <summary>

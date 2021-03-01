@@ -1,11 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.eShopWeb.ApplicationCore.Entities;
-using Microsoft.eShopWeb.BackendAdmin.Interfaces;
-using Microsoft.eShopWeb.BackendAdmin.ServiceInterfaces;
-using Microsoft.eShopWeb.BackendAdmin.ViewModels;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.eShopWeb.BusinessCore.Interfaces;
+using Microsoft.eShopWeb.BusinessCore.ViewModel;
 using Microsoft.eShopWeb.Web.Controllers.Api;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;

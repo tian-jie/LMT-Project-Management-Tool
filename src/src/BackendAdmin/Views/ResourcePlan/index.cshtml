@@ -1,0 +1,460 @@
+﻿@{ Layout = "_AdminLayout"; }
+
+@section styles {
+    <link href="~/css/dhtmlxgantt.css" rel="stylesheet">
+    <link rel='stylesheet' href='~/css/dhtmlx.css' />
+
+    <style>
+        html, body {
+            padding: 0px;
+            margin: 0px;
+            height: 100%;
+        }
+
+        .dhx_calendar_cont input {
+            width: 96px;
+            padding: 0;
+            margin: 3px 10px 10px 10px;
+            font-size: 11px;
+            height: 17px;
+            text-align: center;
+            border: 1px solid #ccc;
+            color: #646464;
+        }
+
+        .dhtmlxcalendar_dhx_skyblue, .dhtmlxcalendar_dhx_web, .dhtmlxcalendar_dhx_terrace {
+            z-index: 999999 !important;
+        }
+    </style>
+
+
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <!-- Project Information -->
+        <div class="row">
+            <div class="tile_count col-md-12">
+                <div class="col-md-3 col-sm-4  tile_stats_count">
+                    <span class="count_top"><i class="fa fa-usd" aria-hidden="true"></i> Total Hours</span>
+                    <div id="total-hours" class="count">-</div>
+                    <span class="count_bottom"><i class="fa fa-clock-o"></i> Estimate by Hours</span>
+                </div>
+                <div class="col-md-3 col-sm-4  tile_stats_count">
+                    <span class="count_top"><i class="fa fa-clock-o"></i> Total Effort</span>
+                    <div id="total-effort" class="count">-</div>
+                    <span class="count_bottom"><i class="fa fa-calculator"></i> Calculated by Rate</span>
+                </div>
+                <div class="col-md-3 col-sm-4  tile_stats_count">
+                    <span class="count_top"><i class="fa fa-user"></i> Total Budget</span>
+                    <div id="total-budget" class="count green">-</div>
+                    <span class="count_bottom"><i class="green"><i class="fa fa-jpy"></i></i> Budget Assigned to Project</span>
+                </div>
+            </div>
+        </div>
+        <!-- /top tiles -->
+
+        <div class="row">
+
+            <div id="toolbar">
+                <button class="btn btn-success" data-toggle="modal" data-target=".bs-example-modal-lg" onclick="edit(0)">添加</button>
+                <button class="btn btn-warning" onclick="refreshData()">刷新</button>
+            </div>
+            <div class="col-md-12 col-sm-12 table-responsive">
+                <form class="gantt_control">
+                    <input type="button" value="Zoom In" onclick="zoomIn()">
+                    <input type="button" value="Zoom Out" onclick="zoomOut()">
+
+                    <input type="radio" id="scale1" class="gantt_radio" name="scale" value="day">
+                    <label for="scale1">Day scale</label>
+
+                    <input type="radio" id="scale2" class="gantt_radio" name="scale" value="week">
+                    <label for="scale2">Week scale</label>
+
+                    <input type="radio" id="scale3" class="gantt_radio" name="scale" value="month" checked>
+                    <label for="scale3">Month scale</label>
+
+                    <input type="radio" id="scale4" class="gantt_radio" name="scale" value="quarter">
+                    <label for="scale4">Quarter scale</label>
+
+                    <input type="radio" id="scale5" class="gantt_radio" name="scale" value="year">
+                    <label for="scale5">Year scale</label>
+
+                </form>
+                <div id="gantt_here" style='width:100%; height:calc(100vh - 100px);'></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script src="~/js/dhtmlxgantt.js"></script>
+    @*<script src="https://docs.dhtmlx.com/gantt/samples/11_resources/common/resource_filter.js?v=7.0.13"></script>*@
+    <script src='~/js/dhtmlx.js'></script>
+
+
+    <script language="javascript">
+        var zoomConfig = {
+            levels: [
+                {
+                    name: "day",
+                    scale_height: 27,
+                    min_column_width: 80,
+                    scales: [
+                        { unit: "day", step: 1, format: "%d %M" }
+                    ]
+                },
+                {
+                    name: "week",
+                    scale_height: 50,
+                    min_column_width: 50,
+                    scales: [
+                        {
+                            unit: "week", step: 1, format: function (date) {
+                                var dateToStr = gantt.date.date_to_str("%d %M");
+                                var endDate = gantt.date.add(date, -6, "day");
+                                var weekNum = gantt.date.date_to_str("%W")(date);
+                                return "#" + weekNum + ", " + dateToStr(date) + " - " + dateToStr(endDate);
+                            }
+                        },
+                        { unit: "day", step: 1, format: "%j %D" }
+                    ]
+                },
+                {
+                    name: "month",
+                    scale_height: 50,
+                    min_column_width: 120,
+                    scales: [
+                        { unit: "month", format: "%F, %Y" },
+                        { unit: "week", format: "Week #%W" }
+                    ]
+                },
+                {
+                    name: "quarter",
+                    height: 50,
+                    min_column_width: 90,
+                    scales: [
+                        { unit: "month", step: 1, format: "%M" },
+                        {
+                            unit: "quarter", step: 1, format: function (date) {
+                                var dateToStr = gantt.date.date_to_str("%M");
+                                var endDate = gantt.date.add(gantt.date.add(date, 3, "month"), -1, "day");
+                                return dateToStr(date) + " - " + dateToStr(endDate);
+                            }
+                        }
+                    ]
+                },
+                {
+                    name: "year",
+                    scale_height: 50,
+                    min_column_width: 30,
+                    scales: [
+                        { unit: "year", step: 1, format: "%Y" }
+                    ]
+                }
+            ]
+        };
+
+        $(document).ready(function () {
+            gantt.ext.zoom.init(zoomConfig);
+            gantt.ext.zoom.attachEvent("onAfterZoom", function (level, config) {
+                document.querySelector(".gantt_radio[value='" + config.name + "']").checked = true;
+            });
+
+            gantt.ext.zoom.setLevel("month");
+            gantt.config.date_format = "%Y-%m-%d";
+
+            ganttConfiguration();
+            gantt.init('gantt_here');
+
+            refreshGanttData();
+
+
+            addGanttEvent();
+        });
+
+        function zoomIn() {
+            gantt.ext.zoom.zoomIn();
+        }
+        function zoomOut() {
+            gantt.ext.zoom.zoomOut()
+        }
+
+        function byId(list, id) {
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].key == id)
+                    return list[i].label || "";
+            }
+            return "";
+        }
+
+        var radios = document.getElementsByName("scale");
+        for (var i = 0; i < radios.length; i++) {
+            radios[i].onclick = function (event) {
+                gantt.ext.zoom.setLevel(event.target.value);
+            };
+        }
+
+        function addGanttEvent() {
+            gantt.attachEvent('onAfterTaskAdd', function (id, item) {
+                console.log('onAfterTaskAdd');
+                var t = clone(item);
+                t.id = 0;
+                createOrUpdateTask(t);
+                //any custom logic here
+            });
+
+            gantt.attachEvent('onAfterTaskDelete', function (id, item) {
+                console.log('onAfterTaskDelete');
+                //any custom logic here
+            });
+
+
+            gantt.attachEvent("onAfterTaskUpdate", function (id, item) {
+                console.log('onAfterTaskUpdate');
+                createOrUpdateTask(item);
+                //any custom logic here
+            });
+
+            gantt.attachEvent('onTaskCreated', function (task) {
+                // 发送请求到后台
+                console.debug(JSON.stringify(task));
+                return true;
+            });
+
+        }
+
+        function createOrUpdateTask(task) {
+            // 修改task对应的employeeGid
+            task.employeeGid = task.owner_id;
+            task.projectGid = getQueryVariable('projectGid');
+            console.log(JSON.stringify(task));
+
+            $.ajax({
+                type: 'POST',
+                url: 'https://localhost:44339/api/resource-plan/create-or-update',
+                contentType: 'application/json',
+                data: JSON.stringify(task),
+                success: function (result) {
+                    console.log('api/resource-plan/create-or-update - success');
+                    //roles = result.data.sort(function (a, b) { return a.sort - b.sort });
+                    //var roleOptions = '';
+                    //roles.forEach(function (r) {
+                    //    var option = '<option value="' + r.id + '"' + (r.id == 37 ? ' selected' : '') + '>' + r.title + '</option>\n';
+                    //    roleOptions += option;
+                    //});
+                    //$('#data-role')[0].innerHTML = roleOptions;
+                    refreshGanttData(false);
+                }
+            });
+        }
+        var calendar_init = function (id, data, date) {
+            var obj = new dhtmlXCalendarObject(id);
+            obj.setDateFormat(data.date_format ? data.date_format : '');
+            obj.setDate(date ? date : (new Date()));
+            obj.hideTime();
+            if (data.skin)
+                obj.setSkin(data.skin);
+            return obj;
+        };
+
+
+        function customGanttLightBoxControll(gantt) {
+            gantt.config.lightbox.sections = [
+                { name: "description", height: 80, map_to: "taskName", type: "textarea", focus: true },
+                { name: "owner", height: 22, map_to: "owner_id", type: "select", options: gantt.serverList("staff") },
+                { name: "workload", height: 22, map_to: "auto", type: "select", options: [{ key: 50, label: '50%' }, { key: 100, label: '100%' }] },
+                { name: "time", type: "dhx_calendar", map_to: "auto", skin: '', date_format: '%Y-%m-%d' }
+            ];
+
+
+            gantt.form_blocks["dhx_calendar"] = {
+                render: function (sns) {
+                    return "<div class='dhx_calendar_cont'><input type='text' readonly='true' id='calendar1'/> &#8211; "
+                        + "<input type='text' readonly='true' id='calendar2'/><label id='duration'></label></div>";
+                },
+                set_value: function (node, value, task, data) {
+                    var a = node._cal_start = calendar_init('calendar1', data, task.start_date);
+                    var b = node._cal_end = calendar_init('calendar2', data, task.end_date);
+                    var c = node.lastChild;
+
+                    b.setInsensitiveRange(null, new Date(a.getDate(false)));
+
+                    var a_click = a.attachEvent("onClick", function (date) {
+                        b.setInsensitiveRange(null, new Date(date.getTime()));
+                        duration(a, b, c);
+                    });
+
+                    var b_click = b.attachEvent("onClick", function (date) {
+                        duration(a, b, c);
+                    });
+
+                    var a_time_click = a.attachEvent("onChange", function (d) {
+                        b.setInsensitiveRange(null, new Date(d.getTime()));
+                        duration(a, b, c);
+                    });
+
+                    var b_time_click = b.attachEvent("onChange", function (d) {
+                        duration(a, b, c);
+                    });
+
+
+                    var id = gantt.attachEvent("onAfterLightbox", function () {
+                        a.detachEvent(a_click);
+                        a.detachEvent(a_time_click);
+                        a.unload();
+                        b.detachEvent(b_click);
+                        b.detachEvent(b_time_click);
+                        b.unload();
+                        a = b = null;
+                        this.detachEvent(id);
+                    });
+
+                    document.getElementById('calendar1').value = a.getDate(true);
+                    document.getElementById('calendar2').value = b.getDate(true);
+                    duration(a, b, c);
+                },
+                get_value: function (node, task) {
+                    task.start_date = node._cal_start.getDate(false).addHours(8);
+                    task.end_date = node._cal_end.getDate(false).addHours(8);
+                    return task;
+                },
+                focus: function (node) {
+                }
+            };
+        }
+
+        var duration = function (a, b, c) {
+            var res = gantt.calculateDuration(a.getDate(false), b.getDate(false));
+            c.innerHTML = res + ' days';
+        };
+
+        function refreshGanttData(initLightbox = true) {
+            $.ajax({
+                type: 'GET',
+                url: 'https://localhost:44339/api/resource-plan/list/' + getQueryVariable('projectGid'),
+                success: function (result) {
+                    console.log('get gantt data - success');
+                    // 设置resource
+                    var resources = result.resources.sort(function (a, b) {
+                        var x = a.label.toLowerCase();
+                        var y = b.label.toLowerCase();
+                        if (x < y) { return -1; }
+                        if (x > y) { return 1; }
+                        return 0;
+                    });
+                    gantt.serverList("staff", resources);
+                    if (initLightbox) {
+                        customGanttLightBoxControll(gantt);
+                    }
+                    var taskData = {
+                        tasks: []
+                    };
+                    taskData.tasks = createTaskData(result.tasks, resources);
+
+                    gantt.clearAll();
+                    gantt.parse(taskData);
+
+                }
+            });
+
+
+        }
+
+        function ganttConfiguration() {
+            gantt.config.grid_width = 420;
+            gantt.config.grid_resize = true;
+            gantt.config.open_tree_initially = true;
+
+            var labels = gantt.locale.labels;
+            labels.column_owner = labels.section_owner = 'Resource';
+            labels.column_owner = labels.section_workload = 'Workload';
+
+            gantt.config.columns = [
+                { name: 'taskName', label: 'Task name', tree: true, width: '240' },
+                { name: 'add', width: 40 }
+            ];
+
+            gantt.templates.grid_row_class =
+                gantt.templates.task_row_class =
+                gantt.templates.task_class = function (start, end, task) {
+                    var css = [];
+                    if (task.$virtual || task.type == gantt.config.types.project)
+                        css.push('summary-bar');
+
+                    if (task.owner_id) {
+                        css.push('gantt_resource_task gantt_resource_' + task.owner_id);
+                    }
+
+                    return css.join(' ');
+                };
+
+            gantt.config.date_format = "%Y-%m-%d";
+        }
+
+        function createTaskData(tasks, resources) {
+            // 补充以resource为主的task，然后清空resource name，然后将task的parent设置为resource的task
+            var resourceTasks = [];
+            console.log("开始组装resource树");
+            var resourceId = 9999000000;
+            tasks.forEach((value, index, arr) => {
+                var resource = resourceTasks.find((item) => item.gid === value.owner_id);
+                if (!resource) {
+                    resource = resources.find((item) => item.key === value.owner_id);
+                    var resourceTask = {
+                        id: resourceId,
+                        gid: resource.key,
+                        taskName: resource.label,
+                        owner_id: null,
+                        text: ''
+                    };
+                    resourceTasks.push(resourceTask);
+                    resource.id = resourceId;
+                    resourceId++;
+                }
+                value.parent = resource.id;
+                value.text = value.taskName;
+            });
+
+            resourceTasks.forEach((value, index, arr) => {
+                tasks.push(value);
+            });
+
+            return tasks;
+        }
+
+        function clone(obj) {
+            // Handle the 3 simple types, and null or undefined
+            if (null == obj || "object" != typeof obj) return obj;
+
+            // Handle Date
+            if (obj instanceof Date) {
+                var copy = new Date();
+                copy.setTime(obj.getTime());
+                return copy;
+            }
+
+            // Handle Array
+            if (obj instanceof Array) {
+                var copy = [];
+                for (var i = 0, len = obj.length; i < len; ++i) {
+                    copy[i] = clone(obj[i]);
+                }
+                return copy;
+            }
+
+            // Handle Object
+            if (obj instanceof Object) {
+                var copy = {};
+                for (var attr in obj) {
+                    if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
+                }
+                return copy;
+            }
+
+            throw new Error("Unable to copy obj! Its type isn't supported.");
+        }
+    </script>
+}

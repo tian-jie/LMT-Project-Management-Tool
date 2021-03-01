@@ -1,9 +1,8 @@
 ﻿using Ardalis.Specification;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.eShopWeb.ApplicationCore.Entities;
-using Microsoft.eShopWeb.BackendAdmin.Interfaces;
+using Microsoft.eShopWeb.BusinessCore.Interfaces;
 using Microsoft.eShopWeb.Web.Controllers.Api;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Microsoft.eShopWeb.BackendAdmin.Controllers

@@ -1,7 +1,5 @@
 ﻿using Microsoft.eShopWeb.ApplicationCore.Interfaces;
 using Microsoft.eShopWeb.ApplicationCore.Services;
-using Microsoft.eShopWeb.BackendAdmin.Interfaces;
-using Microsoft.eShopWeb.BackendAdmin.Services;
 using Microsoft.eShopWeb.Infrastructure.Data;
 using Microsoft.eShopWeb.Infrastructure.Logging;
 using Microsoft.eShopWeb.Infrastructure.Services;
@@ -21,18 +19,6 @@ namespace Microsoft.eShopWeb.Web.Configuration
             services.AddSingleton<IUriComposer>(new UriComposer(configuration.Get<CatalogSettings>()));
             services.AddScoped(typeof(IAppLogger<>), typeof(LoggerAdapter<>));
             services.AddTransient<IEmailSender, EmailSender>();
-
-            services.AddScoped<IClientService, ClientService>();
-            services.AddScoped<IEmployeeService, EmployeeService>();
-            services.AddScoped<IGroupService, GroupService>();
-            services.AddScoped<IProjectService, ProjectService>();
-            services.AddScoped<IProjectTaskService, ProjectTaskService>();
-            services.AddScoped<ITimeEntryService, TimeEntryService>();
-            services.AddScoped<IUserGroupService, UserGroupService>();
-            services.AddScoped<IRoleTitleService, RoleTitleService>();
-            services.AddScoped<ISharePointUserService, SharePointUserService>();
-            services.AddScoped<IEmployeeTitleService, EmployeeTitleService>();
-            services.AddScoped<IEffortUsedByRoleByDateService, EffortUsedByRoleByDateService>();
 
             return services;
         }

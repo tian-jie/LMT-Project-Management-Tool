@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.eShopWeb.ApplicationCore.Constants;
-using Microsoft.eShopWeb.BackendAdmin.Interfaces;
-using Microsoft.eShopWeb.Web.ViewModels;
+using Microsoft.eShopWeb.BusinessCore.ViewModels;
+using Microsoft.eShopWeb.Web.Interfaces;
 using System.Threading.Tasks;
 
 namespace Microsoft.eShopWeb.Web.Pages.Admin
