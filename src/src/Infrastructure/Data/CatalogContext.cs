@@ -42,6 +42,7 @@ namespace Microsoft.eShopWeb.Infrastructure.Data
         public DbSet<AspNetMenu> AspNetMenu { get; set; }
 
         public DbSet<ProjectOwner> ProjectOwner { get; set; }
+        public DbSet<WorkCalendar> WorkCalendar { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -25,6 +25,22 @@
         .dhtmlxcalendar_dhx_skyblue, .dhtmlxcalendar_dhx_web, .dhtmlxcalendar_dhx_terrace {
             z-index: 999999 !important;
         }
+
+        .gantt_task_cell.week_end {
+            background-color: #EFF5FD;
+        }
+
+        .gantt_task_cell.work_day {
+            background-color: #ffffff;
+        }
+
+        .gantt_task_row.gantt_selected .gantt_task_cell.week_end {
+            background-color: #F8EC9C;
+        }
+
+        .gantt_task_row.gantt_selected .gantt_task_cell.work_day {
+            background-color: #ffffff;
+        }
     </style>
 
 
@@ -101,7 +117,7 @@
                 {
                     name: "day",
                     scale_height: 27,
-                    min_column_width: 80,
+                    min_column_width: 35,
                     scales: [
                         { unit: "day", step: 1, format: "%d %M" }
                     ]
@@ -109,7 +125,7 @@
                 {
                     name: "week",
                     scale_height: 50,
-                    min_column_width: 50,
+                    min_column_width: 20,
                     scales: [
                         {
                             unit: "week", step: 1, format: function (date) {
@@ -125,10 +141,11 @@
                 {
                     name: "month",
                     scale_height: 50,
-                    min_column_width: 120,
+                    min_column_width: 20,
                     scales: [
                         { unit: "month", format: "%F, %Y" },
-                        { unit: "week", format: "Week #%W" }
+                        { unit: "week", format: "Week #%W" },
+                        { unit: "day", step: 1, format: "%j" },
                     ]
                 },
                 {
@@ -156,6 +173,43 @@
                 }
             ]
         };
+        var calendars = [];
+
+        function initStandardCalendar(years) {
+            var standardCalendar = [];
+
+            years.forEach((year) => {
+                var d = new Date(Date.UTC(year, 0, 1));
+                while (d.getFullYear() == year) {
+                    var weekday = d.getDay();
+                    var calendarDate = {
+                        date: clone(d),
+                        weekday: weekday,
+                        isWorkingDay: true
+                    };
+
+                    if (weekday == 0 || weekday == 6) {
+                        calendarDate.isWorkingDay = false;
+                    }
+
+                    standardCalendar.push(calendarDate);
+                    d = d.addDays(1);
+                }
+            });
+            return standardCalendar;
+        }
+
+        function createCustomCalendar(holidays) {
+            var standardCalendar = initStandardCalendar([2021, 2022]);
+
+            holidays.forEach((holiday) => {
+                var d = standardCalendar.find((value) => { value.date == holiday.date });
+                if (d) {
+                    d.isWorkingDay = holiday.isWorkingDay;
+                }
+            });
+            return clone(standardCalendar)
+        }
 
         $(document).ready(function () {
             gantt.ext.zoom.init(zoomConfig);
@@ -227,6 +281,10 @@
         }
 
         function createOrUpdateTask(task) {
+            // 修改task到中国正常时间
+            task.start_date = task.start_date.addHours(8)
+            task.end_date = task.end_date.addHours(8)
+
             // 修改task对应的employeeGid
             task.employeeGid = task.owner_id;
             task.projectGid = getQueryVariable('projectGid');
@@ -265,7 +323,7 @@
             gantt.config.lightbox.sections = [
                 { name: "description", height: 80, map_to: "taskName", type: "textarea", focus: true },
                 { name: "owner", height: 22, map_to: "owner_id", type: "select", options: gantt.serverList("staff") },
-                { name: "workload", height: 22, map_to: "auto", type: "select", options: [{ key: 50, label: '50%' }, { key: 100, label: '100%' }] },
+                { name: "workload", height: 22, map_to: "workload", type: "select", options: [{ key: '0', label: '0%' }, { key: '50', label: '50%' }, { key: '100', label: '100%' }] },
                 { name: "time", type: "dhx_calendar", map_to: "auto", skin: '', date_format: '%Y-%m-%d' }
             ];
 
@@ -317,8 +375,8 @@
                     duration(a, b, c);
                 },
                 get_value: function (node, task) {
-                    task.start_date = node._cal_start.getDate(false).addHours(8);
-                    task.end_date = node._cal_end.getDate(false).addHours(8);
+                    task.start_date = node._cal_start.getDate(false);
+                    task.end_date = node._cal_end.getDate(false);
                     return task;
                 },
                 focus: function (node) {
@@ -339,15 +397,32 @@
                     console.log('get gantt data - success');
                     // 设置resource
                     var resources = result.resources.sort(function (a, b) {
-                        var x = a.label.toLowerCase();
-                        var y = b.label.toLowerCase();
+                        var x = a.name.toLowerCase();
+                        var y = b.name.toLowerCase();
                         if (x < y) { return -1; }
                         if (x > y) { return 1; }
                         return 0;
                     });
+
+                    resources.forEach((value, index, arr) => {
+                        value.key = value.id;
+                        value.label = value.name;
+                    });
+
                     gantt.serverList("staff", resources);
                     if (initLightbox) {
                         customGanttLightBoxControll(gantt);
+                        // 初始化calendar
+                        calendars = [];
+                        var holidays = result.calendars;
+                        console.log('初始化calendar');
+                        holidays.forEach((holiday) => {
+                            calendars.push({
+                                country: holiday.country,
+                                calendar: createCustomCalendar(holiday.holidays)
+                            });
+                        });
+
                     }
                     var taskData = {
                         tasks: []
@@ -355,11 +430,11 @@
                     taskData.tasks = createTaskData(result.tasks, resources);
 
                     gantt.clearAll();
+                    //setCalendar(holidays.find((item) => item.country === 'China').holidays);
                     gantt.parse(taskData);
 
                 }
             });
-
 
         }
 
@@ -367,6 +442,12 @@
             gantt.config.grid_width = 420;
             gantt.config.grid_resize = true;
             gantt.config.open_tree_initially = true;
+            gantt.config.work_time = true;
+
+            //gantt.config.min_column_width = 20;
+            //gantt.config.duration_unit = "day";
+            //gantt.config.scale_height = 20 * 3;
+            //gantt.config.row_height = 30;
 
             var labels = gantt.locale.labels;
             labels.column_owner = labels.section_owner = 'Resource';
@@ -390,6 +471,45 @@
 
                     return css.join(' ');
                 };
+
+            gantt.templates.timeline_cell_class = function (task, date) {
+                if (!gantt.isWorkTime(date))
+                    return "week_end";
+
+
+                //// 自定义worktime判定
+                //if (!task.owner_id) {
+                //    return;
+                //}
+
+                //date = date.addHours(8);
+                //// 根据task找employeeGid，再到resources里找contry，再到calendar里找对应的日期（date）的working状态
+                //var employeeGid = task.employeeGid;
+                ////console.log('employeeGid: ' + employeeGid);
+                //var country = gantt.serverList('staff').find((staff) => staff.key === employeeGid).country;
+                ////var country = 'China';
+                ////console.log('country: ' + JSON.stringify(country));
+                ////console.log(task);
+                ////console.log(JSON.stringify(gantt.serverList('staff')));
+
+                //var calendar = calendars.find((item) => item.country === country);
+                ////console.log('xxxx: ' + xxxx++);
+                ////console.log(JSON.stringify(calendar));
+                ////console.log(JSON.stringify(date));
+                //var workingday = calendar.calendar.find((item) => item.date.getTime() == date.getTime());
+                ////var workingday = true;
+                //if (!workingday) {
+                //    //console.log('!workingday')
+                //    return;
+                //}
+
+                //if (!workingday.isWorkingDay) {
+                //    //console.log('workingday.isWorkingDay')
+                //    return 'week_end';
+                //}
+                return;
+            };
+
 
             gantt.config.date_format = "%Y-%m-%d";
         }
@@ -455,6 +575,16 @@
             }
 
             throw new Error("Unable to copy obj! Its type isn't supported.");
+        }
+
+        function setCalendar(holidays) {
+            holidays.forEach((holiday) => {
+                if (holiday.isWorkingDay) {
+                    gantt.setWorkTime({ date: new Date(holiday.date), hours: false });
+                } else {
+                    gantt.unsetWorkTime({ date: new Date(holiday.date), hours: false });
+                }
+            });
         }
     </script>
 }

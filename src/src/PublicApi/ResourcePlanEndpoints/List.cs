@@ -14,12 +14,13 @@ namespace Microsoft.eShopWeb.PublicApi.ResourcePlanEndpoints
     {
         private readonly IResourcePlanService _resourcePlanService;
         private readonly IEmployeeService _employeeService;
+        private readonly IWorkCalendarService _workCalendarService;
 
-
-        public List(IResourcePlanService resourcePlanService, IEmployeeService employeeService)
+        public List(IResourcePlanService resourcePlanService, IEmployeeService employeeService, IWorkCalendarService workCalendarService)
         {
             _resourcePlanService = resourcePlanService;
             _employeeService = employeeService;
+            _workCalendarService = workCalendarService;
         }
 
         [HttpGet("api/resource-plan/list/{Id}")]
@@ -36,7 +37,7 @@ namespace Microsoft.eShopWeb.PublicApi.ResourcePlanEndpoints
             var items = (await _resourcePlanService.WhereAsync(a => a.ProjectGid == queryId)).ToList();
             var employees = await _employeeService.ListAllAsync(cancellationToken);
 
-            response.tasks.AddRange(items.Select(a => new ResourcePlanItem()
+            response.Tasks.AddRange(items.Select(a => new ResourcePlanItem()
             {
                 id = a.Id,
                 TaskName = a.TaskName,
@@ -49,19 +50,31 @@ namespace Microsoft.eShopWeb.PublicApi.ResourcePlanEndpoints
                 open = true,
                 progress = 0,
                 Workload = a.Workload
-
             }));
 
             var taskResources = items.Select(a => a.EmployeeGid).Distinct();
 
-            //employees = employees.Where(a => taskResources.Contains(a.Gid)).ToList();
-
-            response.resources.AddRange(employees.Select(a => new ResourceItem()
+            var calendarsByCountry = (await _workCalendarService.ListAllAsync()).GroupBy(a => a.Country);
+            foreach (var calendar in calendarsByCountry)
             {
-                key = a.Gid,
-                label = a.DisplayName,
-                backgroundColor = GetColorStringByString(a.FullName),
-                textColor = GetInvertColorStringByString(a.FullName)
+                var calendarItem = new CalendarItem();
+                response.Calendars.Add(calendarItem);
+                calendarItem.Country = calendar.Key;
+                calendarItem.Holidays = calendar.Select(a => new HolidayItem()
+                {
+                    Date = a.Date,
+                    IsWorkingDay = a.IsWorkDay,
+                    Description = a.Description
+                }).ToList();
+            }
+
+            response.Resources.AddRange(employees.Select(a => new ResourceItem()
+            {
+                Id = a.Gid,
+                Name = a.DisplayName,
+                Country = a.OfficeCountry,
+                BackgroundColor = GetColorStringByString(a.FullName),
+                TextColor = GetInvertColorStringByString(a.FullName)
             }));
 
             return Ok(response);
@@ -90,20 +103,12 @@ namespace Microsoft.eShopWeb.PublicApi.ResourcePlanEndpoints
             for (int i = 0; i < bytHash.Length - 3; i += 3)
             {
                 num1 += bytHash[i];
-                if (num1 >= 256)
-                {
-                    num1 -= 256;
-                }
                 num2 += bytHash[i + 1];
-                if (num2 >= 256)
-                {
-                    num2 -= 256;
-                }
                 num3 += bytHash[i + 2];
-                if (num3 >= 256)
-                {
-                    num3 -= 256;
-                }
+
+                num1 = num1 & 255;
+                num2 = num2 & 255;
+                num3 = num3 & 255;
             }
 
             return new int[] { num1, num2, num3 };

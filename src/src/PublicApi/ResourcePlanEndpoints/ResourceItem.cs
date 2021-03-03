@@ -2,12 +2,14 @@
 {
     public class ResourceItem
     {
-        public string key { get; set; }
+        public string Id { get; set; }
 
-        public string label { get; set; }
+        public string Name { get; set; }
 
-        public string backgroundColor { get; set; }
+        public string Country { get; set; }
 
-        public string textColor { get; set; }
+        public string BackgroundColor { get; set; }
+
+        public string TextColor { get; set; }
     }
 }

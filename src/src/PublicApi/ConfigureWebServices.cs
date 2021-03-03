@@ -28,7 +28,7 @@ namespace Microsoft.eShopWeb.PublicApi.Configuration
             services.AddScoped<ISharePointUserService, SharePointUserService>();
             services.AddScoped<IEmployeeTitleService, EmployeeTitleService>();
             services.AddScoped<IEffortUsedByRoleByDateService, EffortUsedByRoleByDateService>();
-
+            services.AddScoped<IWorkCalendarService, WorkCalendarService>();
 
             return services;
         }

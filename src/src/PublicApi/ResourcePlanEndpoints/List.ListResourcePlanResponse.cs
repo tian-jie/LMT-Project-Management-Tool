@@ -13,7 +13,10 @@ namespace Microsoft.eShopWeb.PublicApi.ResourcePlanEndpoints
         {
         }
 
-        public List<ResourcePlanItem> tasks { get; set; } = new List<ResourcePlanItem>();
-        public List<ResourceItem> resources { get; set; } = new List<ResourceItem>();
+        public List<ResourcePlanItem> Tasks { get; set; } = new List<ResourcePlanItem>();
+
+        public List<ResourceItem> Resources { get; set; } = new List<ResourceItem>();
+
+        public List<CalendarItem> Calendars { get; set; } = new List<CalendarItem>();
     }
 }
