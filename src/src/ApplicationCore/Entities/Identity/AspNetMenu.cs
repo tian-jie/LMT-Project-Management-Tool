@@ -14,7 +14,7 @@ namespace Microsoft.eShopWeb.ApplicationCore.Entities
         public int? SortCode { get; set; }
         public string NavigateUrl { get; set; }
         public int? MenuType { get; set; }
-        public bool? IsDeleted { get; set; }
+        public bool IsDeleted { get; set; }
         public string MenuGroup { get; set; }
         public int? FormID { get; set; }
         public string MenuTitle { get; set; }
