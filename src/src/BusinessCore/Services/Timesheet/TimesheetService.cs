@@ -231,6 +231,7 @@ namespace Microsoft.eShopWeb.BusinessCore.Services
             var projectIdList = (await _projectService.ListAllAsync()).Select(a => a.Gid).ToList();
             var taskIdList = (await _projectTaskService.ListAllAsync()).Select(a => a.Gid).ToList();
             var tasksToAdd = new List<ProjectTask>();
+            var projectsToAdd = new List<Project>();
 
             foreach (var l in ls)
             {
@@ -267,6 +268,21 @@ namespace Microsoft.eShopWeb.BusinessCore.Services
                             ProjectGid = l.projectId
                         });
                     }
+
+                    // 检查project是否存在，如果不存在，在project表里添加一条项目记录
+                    if (!projectIdList.Contains(l.projectId))
+                    {
+                        projectIdList.Add(l.projectId);
+                        projectsToAdd.Add(new Project()
+                        {
+                            Archived = false,
+                            Billable = true,
+                            Gid = l.projectId,
+                            IsDeleted = false,
+                            Name = l.projectName
+
+                        });
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -282,6 +298,7 @@ namespace Microsoft.eShopWeb.BusinessCore.Services
             var insertedRecordCount = await _timeEntryService.AddManyAsync(list);
 
             var cnt = _projectTaskService.AddManyAsync(tasksToAdd);
+            cnt = _projectService.AddManyAsync(projectsToAdd);
 
             return insertedRecordCount;
         }

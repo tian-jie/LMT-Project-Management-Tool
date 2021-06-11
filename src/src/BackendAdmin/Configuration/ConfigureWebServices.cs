@@ -38,6 +38,7 @@ namespace Microsoft.eShopWeb.Web.Configuration
             services.AddScoped<ISharePointUserService, SharePointUserService>();
             services.AddScoped<IEmployeeTitleService, EmployeeTitleService>();
             services.AddScoped<IEffortUsedByRoleByDateService, EffortUsedByRoleByDateService>();
+            services.AddScoped<IOrgChartService, OrgChartService>();
 
 
             return services;

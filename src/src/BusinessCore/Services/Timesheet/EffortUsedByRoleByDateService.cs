@@ -17,10 +17,10 @@ namespace Microsoft.eShopWeb.BusinessCore.Services
         {
         }
 
-        public new Task<int> SqlExecuteNonQuery(string sql, CancellationToken cancellationToken = default)
-        {
-            throw new Exception("Not allowed.");
-        }
+        //public new Task<int> SqlExecuteNonQuery(string sql, CancellationToken cancellationToken = default)
+        //{
+        //    throw new Exception("Not allowed.");
+        //}
 
 
         public async Task<List<EffortUsedViewModel>> GetEffortUsedByDay(string projectGid, string taskGid)

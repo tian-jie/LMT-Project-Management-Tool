@@ -118,12 +118,13 @@ namespace Microsoft.eShopWeb.BackendAdmin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateSharepointUsers(string sharePointPeople)
+        public async Task<IActionResult> UpdateSharepointUsers([FromBody]List<SharePointPeopleViewModel> sharePointPeopled)
         {
             //var employees = await _employeeService.ListAllAsync();
             //var employeeTitles = await _employeeTitleService.ListAllAsync();
             //// 更新每个员工的基本信息
             //foreach(var p in sharePointPeople)
+
             //{
             //    var employee = employees.FirstOrDefault(a => a.Email.ToLower() == p.EmailAddress.EmailAddress.ToLower());
             //    if(employee == null)
@@ -148,7 +149,7 @@ namespace Microsoft.eShopWeb.BackendAdmin.Controllers
             //    }
             //}
 
-            var sharePointPeopled = Newtonsoft.Json.JsonConvert.DeserializeObject<List<SharePointPeopleViewModel>>(sharePointPeople);
+            //var sharePointPeopled = Newtonsoft.Json.JsonConvert.DeserializeObject<List<SharePointPeopleViewModel>>(sharePointPeople);
 
 
             // 把SharePointUsers信息存到数据库里，再写两个Update语句就OK了

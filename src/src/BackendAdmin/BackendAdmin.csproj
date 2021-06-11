@@ -9,9 +9,21 @@
 
   <ItemGroup>
     <Compile Remove="Catalog\**" />
+    <Compile Remove="Common\**" />
+    <Compile Remove="ServiceInterfaces\**" />
+    <Compile Remove="ViewModels\**" />
     <Content Remove="Catalog\**" />
+    <Content Remove="Common\**" />
+    <Content Remove="ServiceInterfaces\**" />
+    <Content Remove="ViewModels\**" />
     <EmbeddedResource Remove="Catalog\**" />
+    <EmbeddedResource Remove="Common\**" />
+    <EmbeddedResource Remove="ServiceInterfaces\**" />
+    <EmbeddedResource Remove="ViewModels\**" />
     <None Remove="Catalog\**" />
+    <None Remove="Common\**" />
+    <None Remove="ServiceInterfaces\**" />
+    <None Remove="ViewModels\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -47,16 +59,15 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.8.0" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Common\" />
-    <Folder Include="ServiceInterfaces\" />
-    <Folder Include="ViewModels\" />
     <Folder Include="wwwroot\lib\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ApplicationCore\ApplicationCore.csproj" />
     <ProjectReference Include="..\BlazorAdmin\BlazorAdmin.csproj" />
     <ProjectReference Include="..\BlazorShared\BlazorShared.csproj" />
-    <ProjectReference Include="..\BusinessCore\BusinessCore.csproj" />
+    <ProjectReference Include="..\BusinessCore\BusinessCore.csproj">
+      <Private>true</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>

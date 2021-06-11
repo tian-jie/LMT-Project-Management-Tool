@@ -27,7 +27,7 @@
     function syncProject() {
         $.ajax({
             type: "POST",
-            url: "/api/clockify/sync-projects",
+            url: "/api/v1/clockify-api/sync-projects",
             success: function (result) {
                 alert(result.message);
             }
@@ -37,7 +37,7 @@
     function syncUser() {
         $.ajax({
             type: "POST",
-            url: "/api/clockify/sync-users",
+            url: "/api/v1/clockify-api/sync-users",
             success: function (result) {
                 alert(result.message);
             }
@@ -47,7 +47,7 @@
     function syncGroup() {
         $.ajax({
             type: "POST",
-            url: "/api/clockify/sync-groups",
+            url: "/api/v1/clockify-api/sync-groups",
             success: function (result) {
                 alert(result.message);
             }
@@ -57,7 +57,7 @@
     function syncClient() {
         $.ajax({
             type: "POST",
-            url: "/api/clockify/sync-clients",
+            url: "/api/v1/clockify-api/sync-clients",
             success: function (result) {
                 alert(result.message);
             }

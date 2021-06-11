@@ -10,6 +10,8 @@ namespace Microsoft.eShopWeb.BusinessCore.Services
 {
     public class EmployeeTitleService : BaseService<EmployeeTitle>, IEmployeeTitleService
     {
+        private List<EmployeeTitle> _employeeTitles = null;
+
         public EmployeeTitleService(CatalogContext dbContext)
             : base(dbContext)
         {
@@ -29,8 +31,12 @@ namespace Microsoft.eShopWeb.BusinessCore.Services
 
         public async Task<List<EmployeeTitle>> ListByMonth(int year, int month)
         {
-            var employeeTitles = await WhereAsync(a => a.Month == year.ToString() + month.ToString("D2"));
-            return employeeTitles.ToList();
+            if(_employeeTitles == null)
+            {
+                _employeeTitles = (await ListAllAsync()).ToList();
+            }
+            var m = year.ToString() + month.ToString("D2") + "  ";
+            return _employeeTitles.Where(a => a.Month == m).ToList();
         }
     }
 }

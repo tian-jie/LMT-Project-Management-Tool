@@ -85,6 +85,8 @@ namespace Microsoft.eShopWeb.BusinessCore.Services
             var response = await httpClient.GetAsync(url);
 
             var res = await response.Content.ReadAsStringAsync();
+
+            _logger.LogInformation(res);
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 throw new System.Exception(res);

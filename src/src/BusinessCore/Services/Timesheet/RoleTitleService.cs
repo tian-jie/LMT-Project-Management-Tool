@@ -9,6 +9,8 @@ namespace Microsoft.eShopWeb.BusinessCore.Services
 {
     public class RoleTitleService : BaseService<RoleTitle>, IRoleTitleService
     {
+        private List<RoleTitle> _internalRoles = null;
+        private List<RoleTitle> _externalRoles = null;
         public RoleTitleService(CatalogContext dbContext)
             : base(dbContext)
         {
@@ -16,14 +18,22 @@ namespace Microsoft.eShopWeb.BusinessCore.Services
 
         public async Task<List<RoleTitle>> GetAllInternalRoles()
         {
-            var roles = await WhereAsync(a => a.Type == "Internal" && a.IsDeleted == false);
-            return roles.ToList();
+            if(_internalRoles!= null && _internalRoles.Count>0)
+            {
+                return _internalRoles;
+            }
+            _internalRoles = (await WhereAsync(a => a.Type == "Internal" && a.IsDeleted == false)).ToList();
+            return _internalRoles;
         }
 
         public async Task<List<RoleTitle>> GetAllExternalRoles()
         {
-            var roles = await WhereAsync(a => a.Type == "External" && a.IsDeleted == false);
-            return roles.ToList();
+            if (_externalRoles != null && _externalRoles.Count > 0)
+            {
+                return _externalRoles;
+            }
+            _externalRoles = (await WhereAsync(a => a.Type == "External" && a.IsDeleted == false)).ToList();
+            return _externalRoles;
         }
 
     }

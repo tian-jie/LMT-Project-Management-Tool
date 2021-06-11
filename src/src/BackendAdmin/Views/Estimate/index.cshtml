@@ -150,7 +150,7 @@
             $('#submit')[0].disabled = true;
             var role = roles.filter(item => item.id == $('#data-role').val())[0];
             var estimate = {
-                projectGid: 'PLC219.1',
+                projectGid: getQueryVariable('projectGid'),
                 projectId: 0,
                 taskGid: '',
                 roleId: $('#data-role').val(),
@@ -159,7 +159,7 @@
                 effort: $('#data-effort').val(),
                 //id: parseInt($('#data-id').val()),
                 id: parseInt($('#data-id').val()),
-                employeeGid: 'tttest',
+                //employeeGid: 'tttest',
             };
 
             $.ajax({

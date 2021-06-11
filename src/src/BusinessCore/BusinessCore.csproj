@@ -7,8 +7,11 @@
 
 	<ItemGroup>
 	  <Compile Remove="Entities\ClockifyModels\**" />
+	  <Compile Remove="Specifications\**" />
 	  <EmbeddedResource Remove="Entities\ClockifyModels\**" />
+	  <EmbeddedResource Remove="Specifications\**" />
 	  <None Remove="Entities\ClockifyModels\**" />
+	  <None Remove="Specifications\**" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -27,7 +30,6 @@
 
 	<ItemGroup>
 	  <Folder Include="Entities\" />
-	  <Folder Include="Specifications\" />
 	</ItemGroup>
 
 </Project>

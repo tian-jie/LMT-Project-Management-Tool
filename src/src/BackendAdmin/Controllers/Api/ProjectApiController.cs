@@ -101,17 +101,17 @@ namespace Microsoft.eShopWeb.BackendAdmin.Controllers
         public async Task<IActionResult> List(string favorateByUserId, string filterByTeam, string filterByOwner)
         {
             var result = await _projectService.ListAllAsync();
-            if (string.IsNullOrEmpty(favorateByUserId))
+            if (!string.IsNullOrEmpty(favorateByUserId))
             {
 
             }
 
-            if (string.IsNullOrEmpty(filterByTeam))
+            if (!string.IsNullOrEmpty(filterByTeam))
             {
 
             }
 
-            if (string.IsNullOrEmpty(filterByOwner))
+            if (!string.IsNullOrEmpty(filterByOwner))
             {
                 var projectIdsByOwner = (await _projectOwnerService.WhereAsync(a => a.EmployeeGid==filterByOwner)).Select(a=>a.ProjectGid).ToList();
                 result = result.Where(a => projectIdsByOwner.Contains(a.Gid)).ToList();
