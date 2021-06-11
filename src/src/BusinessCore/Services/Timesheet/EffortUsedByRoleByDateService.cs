@@ -26,11 +26,11 @@ namespace Microsoft.eShopWeb.BusinessCore.Services
         public async Task<List<EffortUsedViewModel>> GetEffortUsedByDay(string projectGid, string taskGid)
         {
             // TODO: 好像这里有性能问题？？？
-            var effortsQuery = await WhereAsync(a => a.ProjectGid == projectGid);
-            if (!string.IsNullOrEmpty(taskGid))
-            {
-                effortsQuery = effortsQuery.Where(a => a.TaskGid == taskGid);
-            }
+            var effortsQuery = await WhereAsync(a => a.ProjectGid == projectGid && (taskGid == null || a.TaskGid == taskGid));
+            //if (!string.IsNullOrEmpty(taskGid))
+            //{
+            //    effortsQuery = effortsQuery.Where(a => a.TaskGid == taskGid);
+            //}
             var efforts = effortsQuery
                 .GroupBy(b => b.Date)
                 .Select(a => new EffortUsedViewModel
@@ -82,6 +82,6 @@ namespace Microsoft.eShopWeb.BusinessCore.Services
         }
 
 
-        
+
     }
 }

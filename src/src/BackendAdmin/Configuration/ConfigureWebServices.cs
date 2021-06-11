@@ -25,6 +25,7 @@ namespace Microsoft.eShopWeb.Web.Configuration
             services.AddScoped<IEstimateEffortService, EstimateEffortService>();
 
             services.AddScoped<IAspNetMenuService, AspNetMenuService>();
+            services.AddScoped<IAspNetUserService, AspNetUserService>();
             services.AddScoped<IProjectOwnerService, ProjectOwnerService>();
             services.AddScoped<IResourcePlanService, ResourcePlanService>();
             services.AddScoped<IClientService, ClientService>();
