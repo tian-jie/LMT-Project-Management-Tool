@@ -1,27 +1,27 @@
-# RUN ALL CONTAINERS FROM ROOT (folder with .sln file):
-# docker-compose build
-# docker-compose up
-#
-# RUN JUST THIS CONTAINER FROM ROOT (folder with .sln file):
-# docker build --pull -t backend-admin -f src/BackendAdmin/Dockerfile .
-#
-# RUN COMMAND
-#  docker run --name eshopweb --rm -it -p 5106:5106 web
+#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+
+FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
-WORKDIR /app
-
-COPY *.sln .
+WORKDIR /src
+COPY ["src/BackendAdmin/BackendAdmin.csproj", "src/BackendAdmin/"]
+COPY ["src/BusinessCore/BusinessCore.csproj", "src/BusinessCore/"]
+COPY ["src/ApplicationCore/ApplicationCore.csproj", "src/ApplicationCore/"]
+COPY ["src/BlazorShared/BlazorShared.csproj", "src/BlazorShared/"]
+COPY ["src/Infrastructure/Infrastructure.csproj", "src/Infrastructure/"]
+COPY ["src/BlazorAdmin/BlazorAdmin.csproj", "src/BlazorAdmin/"]
+RUN dotnet restore "src/BackendAdmin/BackendAdmin.csproj"
 COPY . .
-WORKDIR /app/src/BackendAdmin
-RUN dotnet restore
+WORKDIR "/src/src/BackendAdmin"
+RUN dotnet build "BackendAdmin.csproj" -c Release -o /app/build
 
-RUN dotnet publish -c Release -o out
+FROM build AS publish
+RUN dotnet publish "BackendAdmin.csproj" -c Release -o /app/publish
 
-FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS runtime
+FROM base AS final
 WORKDIR /app
-COPY --from=build /app/src/BackendAdmin/out ./
-
-# Optional: Set this here if not setting it from docker-compose.yml
-# ENV ASPNETCORE_ENVIRONMENT Development
-
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "BackendAdmin.dll"]
