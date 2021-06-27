@@ -68,10 +68,14 @@ namespace Microsoft.eShopWeb.Infrastructure.Data
 
         public async Task<int> AddManyAsync(List<T> entities, CancellationToken cancellationToken = default)
         {
-            foreach (var entity in entities)
-            {
-                await _dbContext.Set<T>().AddAsync(entity);
-            }
+            //foreach (var entity in entities)
+            //{
+            //    await _dbContext.Set<T>().AddAsync(entity);
+            //}
+            //return await _dbContext.SaveChangesAsync(cancellationToken);
+
+            await _dbContext.Set<T>().AddRangeAsync(entities);
+
             return await _dbContext.SaveChangesAsync(cancellationToken);
         }
 

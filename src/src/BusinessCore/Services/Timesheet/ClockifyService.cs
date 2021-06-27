@@ -8,12 +8,15 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 namespace Microsoft.eShopWeb.BusinessCore.Services
 {
     public class ClockifyService : IClockifyService
     {
         private readonly IAppLogger<ClockifyService> _logger;
+        private object _locker = new object();
+
 
         public ClockifyService(IAppLogger<ClockifyService> logger)
         {
@@ -133,20 +136,79 @@ namespace Microsoft.eShopWeb.BusinessCore.Services
         {
             List<TimeEntryModelV2> timeEntryModelV2s = new List<TimeEntryModelV2>();
 
-            var page = 0;
-            var totalRecord = 20000;
+            var page = 1;
+            var r = await GetTimeEntriesByPageV2(userid, token, page, startDate, endDate);
 
-            do
+            timeEntryModelV2s.AddRange(r.timeEntries);
+            var totalRecord = r.totals[0].entriesCount;
+            _logger.LogInformation($"an item queried: result.timeEntries = {r.timeEntries.Count}");
+
+            if (totalRecord <= 200)
             {
-                page++;
-                var r = await GetTimeEntriesByPageV2(userid, token, page, startDate, endDate);
+                return timeEntryModelV2s;
+            }
+            var tasks = new List<Task>();
 
-                timeEntryModelV2s.AddRange(r.timeEntries);
-                totalRecord = r.totals[0].entriesCount;
-            } while (page * 200 < totalRecord);
+            // 给参数放到列表里，给下面的队列抢
+            ConcurrentQueue<QueueObject> queue = new ConcurrentQueue<QueueObject>();
+            for (var i = 2; i < totalRecord / 200 + 2; i++)
+            {
+                queue.Enqueue(new QueueObject()
+                {
+                    UserId = userid,
+                    Token = token,
+                    PageId = i,
+                    StartDate = startDate,
+                    EndDate = endDate
+                });
+                _logger.LogInformation($"new queue added: page = {i}");
+            }
+
+            // 然后task分页，或者抢占式，8线程
+            for (var i = 0; i < 16; i++)
+            {
+                _logger.LogInformation($"new task created: taskid = {i}");
+                tasks.Add(Task.Run(async () =>
+                {
+                    QueueObject item = null;
+                    while (queue.TryDequeue(out item))
+                    {
+                        try
+                        {
+                            _logger.LogInformation($"an item dequeued: page = {item.PageId}");
+                            // 取出来一个item就开始处理，取不出来就结束
+                            var result = await GetTimeEntriesByPageV2(item.UserId, item.Token, item.PageId, item.StartDate, item.EndDate);
+
+                            lock (_locker)
+                            {
+                                _logger.LogInformation($"an item queried: result.timeEntries = {result.timeEntries.Count}");
+                                timeEntryModelV2s.AddRange(result.timeEntries);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // 如果出错了，给东西放回去
+                            _logger.LogInformation("Task failed, put item to queue again.");
+                            _logger.LogInformation(ex.Message);
+                            queue.Enqueue(item);
+                        }
+                    }
+                }));
+            }
+            Task.WaitAll(tasks.ToArray());
+            //do
+            //{
+            //    page++;
+            //    r = await GetTimeEntriesByPageV2(userid, token, page, startDate, endDate);
+
+            //    timeEntryModelV2s.AddRange(r.timeEntries);
+            //    totalRecord = r.totals[0].entriesCount;
+            //} while (page * 200 < totalRecord);
 
             return timeEntryModelV2s;
         }
+
+
         public async Task<List<TimeEntry>> GetTimeEntriesV3(string userid, string token, DateTime startDate, DateTime endDate)
         {
             var url = "https://reports.api.clockify.me/workspaces/5d5f3b1bbf6ed132e4c82eb8/reports/summary";
@@ -234,7 +296,7 @@ namespace Microsoft.eShopWeb.BusinessCore.Services
             httpClient.DefaultRequestHeaders.Add("x-auth-token", token);
             //httpClient.DefaultRequestHeaders.Referrer = new System.Uri(url);
 
-            httpClient.Timeout = new TimeSpan(0, 10, 0);
+            httpClient.Timeout = new TimeSpan(0, 0, 30);
 
             var response = await httpClient.PostAsync(url, content);
 
@@ -329,5 +391,14 @@ namespace Microsoft.eShopWeb.BusinessCore.Services
             return resultModel;
         }
 
+    }
+
+    class QueueObject
+    {
+        public string UserId { get; set; }
+        public string Token { get; set; }
+        public int PageId { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
     }
 }

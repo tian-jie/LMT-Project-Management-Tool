@@ -44,6 +44,7 @@ namespace Microsoft.eShopWeb.Infrastructure.Data
         public DbSet<ProjectOwner> ProjectOwner { get; set; }
         public DbSet<WorkCalendar> WorkCalendar { get; set; }
         public DbSet<OrgChart> OrgChart { get; set; }
+        public DbSet<YearWeekCalendar> YearWeekCalendar { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -1507,9 +1507,6 @@ function init_daterangepicker() {
     var optionSet1 = {
         startDate: moment().subtract(29, 'days'),
         endDate: moment(),
-        dateLimit: {
-            days: 60
-        },
         showDropdowns: true,
         showWeekNumbers: true,
         timePicker: false,

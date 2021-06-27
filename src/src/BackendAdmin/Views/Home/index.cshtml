@@ -25,13 +25,14 @@
 </div>
 <script language="javascript">
     function syncProject() {
-        $.ajax({
-            type: "POST",
-            url: "/api/v1/clockify-api/sync-projects",
-            success: function (result) {
-                alert(result.message);
-            }
-        });
+    //    $.ajax({
+    //        type: "POST",
+    //        url: "/api/v1/clockify-api/sync-projects",
+    //        success: function (result) {
+    //            alert(result.message);
+    //        }
+    //    });
+        alert('deprecated');
     }
 
     function syncUser() {

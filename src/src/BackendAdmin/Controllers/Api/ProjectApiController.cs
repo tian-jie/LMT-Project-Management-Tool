@@ -2,6 +2,7 @@
 using Microsoft.eShopWeb.BusinessCore.Interfaces;
 using Microsoft.eShopWeb.BusinessCore.ViewModel;
 using Microsoft.eShopWeb.Web.Controllers.Api;
+using Microsoft.eShopWeb.Web.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,22 +16,37 @@ namespace Microsoft.eShopWeb.BackendAdmin.Controllers
         private readonly IProjectService _projectService;
         private readonly IProjectOwnerService _projectOwnerService;
         private readonly IEffortUsedByRoleByDateService _effortUsedByRoleByDateService;
+        private readonly IEstimateEffortService _estimateEffortService;
 
         public ProjectApiController(IProjectService projectService,
             ITimeEntryService timeEntryService,
             IProjectTaskService projectTaskService,
             IEffortUsedByRoleByDateService effortUsedByRoleByDateService,
-            IProjectOwnerService projectOwnerService)
+            IProjectOwnerService projectOwnerService,
+            IEstimateEffortService estimateEffortService)
         {
             _projectTaskService = projectTaskService;
             _timeEntryService = timeEntryService;
             _projectService = projectService;
             _effortUsedByRoleByDateService = effortUsedByRoleByDateService;
             _projectOwnerService = projectOwnerService;
+            _estimateEffortService = estimateEffortService;
         }
 
 
         public async Task<IActionResult> EffortUsedByDay(string projectGid, string taskGid)
+        {
+            var effortsByDay = await EffortUsedByDayPrivate(projectGid, taskGid);
+
+            return new JsonResult(new
+            {
+                code = 200,
+                Message = $"success, {effortsByDay.Count()} records.",
+                data = effortsByDay
+            });
+        }
+
+        private async Task<List<EffortUsedViewModel>> EffortUsedByDayPrivate(string projectGid, string taskGid)
         {
             var effortsByDay = await _effortUsedByRoleByDateService.GetEffortUsedByDay(projectGid, taskGid);
 
@@ -66,12 +82,7 @@ namespace Microsoft.eShopWeb.BackendAdmin.Controllers
                 }
             }
 
-            return new JsonResult(new
-            {
-                code = 200,
-                Message = $"success, {effortsByDay.Count()} records.",
-                data = result
-            });
+            return result;
         }
 
         public async Task<IActionResult> EffortUsedByRole(string projectGid, string taskGid)
@@ -113,7 +124,7 @@ namespace Microsoft.eShopWeb.BackendAdmin.Controllers
 
             if (!string.IsNullOrEmpty(filterByOwner))
             {
-                var projectIdsByOwner = (await _projectOwnerService.WhereAsync(a => a.EmployeeGid==filterByOwner)).Select(a=>a.ProjectGid).ToList();
+                var projectIdsByOwner = (await _projectOwnerService.WhereAsync(a => a.EmployeeGid == filterByOwner)).Select(a => a.ProjectGid).ToList();
                 result = result.Where(a => projectIdsByOwner.Contains(a.Gid)).ToList();
             }
 
@@ -139,5 +150,28 @@ namespace Microsoft.eShopWeb.BackendAdmin.Controllers
             });
         }
 
+
+        public async Task<IActionResult> StatisticsByGid(string projectGid, string taskGid)
+        {
+            var effortByDay = await EffortUsedByDayPrivate(projectGid, taskGid);
+            var effortUsedByRole = await _effortUsedByRoleByDateService.GetEffortUsedByRoleCategory(projectGid, taskGid);
+            var estimate = (await _estimateEffortService.ListAsync(new EstimateEffortSpecification(projectGid))).ToList();
+
+
+            var projectStatisticsViewModel = new ProjectStatisticsViewModel()
+            {
+                EffortUsedByDay = effortByDay,
+                EffortUsedByRole = effortUsedByRole,
+                EstimateEffort = estimate
+            };
+
+            return new JsonResult(new
+            {
+                code = 200,
+                Message = $"success, {effortUsedByRole.Count()} records.",
+                data = projectStatisticsViewModel
+            });
+
+        }
     }
 }

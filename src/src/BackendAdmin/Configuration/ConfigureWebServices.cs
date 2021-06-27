@@ -40,6 +40,7 @@ namespace Microsoft.eShopWeb.Web.Configuration
             services.AddScoped<IEmployeeTitleService, EmployeeTitleService>();
             services.AddScoped<IEffortUsedByRoleByDateService, EffortUsedByRoleByDateService>();
             services.AddScoped<IOrgChartService, OrgChartService>();
+            services.AddScoped<IYearWeekCalendarService, YearWeekCalendarService>();
 
 
             return services;

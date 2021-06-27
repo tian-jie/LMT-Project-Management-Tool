@@ -1,5 +1,6 @@
 ﻿using Microsoft.eShopWeb.ApplicationCore.Entities;
 using Microsoft.eShopWeb.BusinessCore.Interfaces;
+using Microsoft.eShopWeb.BusinessCore.ViewModel;
 using Microsoft.eShopWeb.BusinessCore.ViewModels;
 using Microsoft.eShopWeb.Infrastructure.Data;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ namespace Microsoft.eShopWeb.BusinessCore.Services
             await SqlExecuteNonQuery(sql);
         }
 
-        public async Task<List<EmployeeViewModel>> AllEmployeesWithRole()
+        public async Task<IList<EmployeeViewModel>> AllEmployeesWithRole()
         {
             //            var sql = @"select E.*, R.Id RoleId, R.Title RoleName, R.Rate RoleRate
             //from Employee E, RoleTitle R, EmployeeRate ER
@@ -58,5 +59,15 @@ namespace Microsoft.eShopWeb.BusinessCore.Services
             string sql = "update Employee from SharePointUser SP set FullName = SP.FullName, DisplayName = SP.DisplayName, GivenName=SP.GivenName, OfficeCity = SP.OfficeCity, OfficeCountry = SP.OfficeCountry, FamilyName = SP.FamilyName where SP.Email = E.Email";
             await SqlExecuteNonQuery(sql);
         }
+
+//        public async Task<IList<EmployeeView>> AllEmployeesWithRole() {
+//            var sql = @"select E.*, R.Id RoleId, R.Title RoleName, R.Rate RoleRate
+//from Employee E, RoleTitle R, EmployeeRate ER
+//where E.GID = ER.EmployeeGid and R.ID = ER.RoleId and E.isdeleted<>1 and ER.isdeleted<>1 and R.isdeleted<>1
+//";
+//            var repository = new EfRepository<>
+//            return Repository.UnitOfWork.SqlQuery<EmployeeView>(sql).ToList();
+
+//        }
     }
 }

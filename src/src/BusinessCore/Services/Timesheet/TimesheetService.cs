@@ -248,7 +248,7 @@ namespace Microsoft.eShopWeb.BusinessCore.Services
                         ProjectId = l.projectId,
                         TaskId = l.taskId,
                         TotalHours = (decimal)(l.timeInterval.duration / 3600.0f),
-                        Date = l.timeInterval.start.Date.AddHours(8),
+                        Date = l.timeInterval.start.Date,
                         CreatedDate = DateTime.Now,
                         CreatedUserID = userid,
                         CreatedUserName = userid,
@@ -297,8 +297,8 @@ namespace Microsoft.eShopWeb.BusinessCore.Services
 
             var insertedRecordCount = await _timeEntryService.AddManyAsync(list);
 
-            var cnt = _projectTaskService.AddManyAsync(tasksToAdd);
-            cnt = _projectService.AddManyAsync(projectsToAdd);
+            var cnt = await _projectTaskService.AddManyAsync(tasksToAdd);
+            cnt = await _projectService.AddManyAsync(projectsToAdd);
 
             return insertedRecordCount;
         }

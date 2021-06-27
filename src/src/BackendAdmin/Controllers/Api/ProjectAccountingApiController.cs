@@ -33,17 +33,7 @@ namespace Microsoft.eShopWeb.BackendAdmin.Controllers
         {
             // by项目进行计算
             var tasks = await _timeEntryService.GetAvaliableTaskByTimeEntry(DateTime.Parse(startDate), DateTime.Parse(endDate));
-            var effortUsed = new List<EffortUsedByRoleByDate>();
-
-            var timeEntries = (await _timeEntryService.WhereAsync(a => a.Date >= DateTime.Parse(startDate) && a.Date < DateTime.Parse(endDate).AddDays(1))).ToList();
-
-            var index = 0;
-            var totalCnt = tasks.Count();
-            foreach (var task in tasks)
-            {
-                effortUsed.AddRange(await _timeEntryService.CalculateACByRoleAndSave(task.ProjectGid, task.Gid, DateTime.Parse(startDate), DateTime.Parse(endDate), timeEntries));
-                _logger.LogInformation($"progress: {index++}/{totalCnt}, {(index*100/totalCnt).ToString("F2")}%");
-            }
+            var effortUsed = await CalculateAcByTask(startDate, endDate, tasks);
 
             await _acByRoleByDateService.SqlExecuteNonQuery($"delete from [AcByRoleByDate] where [date]>='{startDate}' and [date]<='{endDate}'");
 
@@ -55,13 +45,37 @@ namespace Microsoft.eShopWeb.BackendAdmin.Controllers
             });
         }
 
-        public async Task<IActionResult> CalculateAcByTask(string startDate, string endDate, string projectGid, string taskGid)
+        private async Task<List<EffortUsedByRoleByDate>> CalculateAcByTask(string startDate, string endDate, List<ProjectTask> tasks)
         {
-            await _timeEntryService.CalculateACByRoleAndSave(projectGid, taskGid, DateTime.Parse(startDate), DateTime.Parse(endDate));
+            var effortUsed = new List<EffortUsedByRoleByDate>();
+
+            var timeEntries = (await _timeEntryService.WhereAsync(a => a.Date >= DateTime.Parse(startDate) && a.Date < DateTime.Parse(endDate).AddDays(1))).ToList();
+
+            var index = 0;
+            var totalCnt = tasks.Count();
+            foreach (var task in tasks)
+            {
+                effortUsed.AddRange(await _timeEntryService.CalculateACByRole(task.ProjectGid, task.Gid, DateTime.Parse(startDate), DateTime.Parse(endDate), timeEntries));
+                _logger.LogInformation($"progress: {index++}/{totalCnt}, {(index * 100 / totalCnt).ToString("F2")}%");
+            }
+
+            return effortUsed;
+        }
+
+        public async Task<IActionResult> CalculateAcByProject(string startDate, string endDate, string projectGid)
+        {
+            var tasks = await _projectTaskService.GetTasksByProject(projectGid);
+
+
+            var effortUsed = await CalculateAcByTask(startDate, endDate, tasks);
+
+            await _acByRoleByDateService.SqlExecuteNonQuery($"delete from [AcByRoleByDate] where [date]>='{startDate}' and [date]<='{endDate}' and projectGid='{projectGid}'");
+
+            await _acByRoleByDateService.AddManyAsync(effortUsed);
 
             return new JsonResult(new
             {
-                Message = $"Calculate finished!"
+                Message = $"Calculate finished! - {tasks.Count()} tasks!, EffortUsed - {effortUsed.Count()} records."
             });
         }
 
